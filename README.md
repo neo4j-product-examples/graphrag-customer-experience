@@ -1,7 +1,7 @@
 # llm-movieagent
 
 This project is designed to implement an agent capable of interacting with a graph database like Neo4j through a semantic layer using OpenAI function calling.
-The semantic layer equips the agent with a suite of robust tools, allowing it to interact with the graph database based on the user's intent.
+The semantic layer equips the agent with a suite of robust tools, allowing it to interact with the graph database based on the user's intent. Read more in the [blog post](https://towardsdatascience.com/enhancing-interaction-between-language-models-and-graph-databases-via-a-semantic-layer-0a78ad3eba49).
 
 ![Workflow diagram](https://raw.githubusercontent.com/tomasonjo/llm-movieagent/main/api/packages/neo4j-semantic-layer/static/workflow.png)
 
@@ -51,7 +51,17 @@ This project contains the following services wrapped as docker containers
 
 ## Populating with data
 
-You can connect to the hosted neo4j instance. Check .env.example for credentials.
+If you want to populate the DB with an example movie dataset, you can run [`ingest.py`](api/ingest.py).
+The script imports information about movies and their rating by users. 
+To run within the api docker container (recommended) do the following:
+```bash
+# access container shell
+docker exec -it <container id for llm-movieagent-api> bash
+# run script
+python ingest.py
+```
+Additionally, the script creates two [fulltext indices](https://neo4j.com/docs/cypher-manual/current/indexes-for-full-text-search/), which are used to map information from user input to the database.
+The dataset is based on the MovieLens dataset, which is also available as the `Recommendation` project in [Neo4j Sandbox](https://sandbox.neo4j.com/?usecase=recommendations).
 
 ## Contributions
 
