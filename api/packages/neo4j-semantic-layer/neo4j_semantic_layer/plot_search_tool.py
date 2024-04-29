@@ -11,27 +11,34 @@ from langchain.tools import BaseTool
 from neo4j_semantic_layer.utils import graph
 
 retrieval_query = """
-CALL db.index.vector.queryNodes($index, $k, $embedding) YIELD node, score
-WITH node AS m, score
-MATCH (m)-[r:ACTED_IN|DIRECTED|HAS_GENRE]-(t)
-WITH m, score, type(r) as type, collect(coalesce(t.name, t.title)) as names
-WITH m, score, type+": "+reduce(s="", n IN names | s + n + ", ") as types
-WITH m, score, collect(types) as contexts
-WITH m, score, "\nplot:" + m.plot + "\nurl:" + m.url + "\nreleased:" + m.released + 
-       "\ntitle: "+ coalesce(m.title, m.name) + "\nyear: "+coalesce(m.released,"") +"\n" +
-       reduce(s="", c in contexts | s + substring(c, 0, size(c)-2) +"\n") as context
+CALL db.index.vector.queryNodes($index, $vectorK, $embedding) YIELD node, score
+WITH node AS m ORDER by m.imdbRating DESC LIMIT $rankingK
+MATCH (m)-[r:ACTED_IN|DIRECTED|IN_GENRE]-(t)
+WITH m, type(r) as type, collect(coalesce(t.name, t.title)) as names
+WITH m, type+": "+reduce(s="", n IN names | s + n + ", ") as types
+WITH m, collect(types) as contexts
+WITH m, "\\nplot:" + m.plot + 
+       //"\\nimage:" + m.poster + 
+       "\\nurl:" + m.url + 
+       "\\nreleased:" + m.released + 
+       "\\ntitle: "+ coalesce(m.title, m.name) + "\\nyear: "+coalesce(m.released,"") +"\n\" +
+       reduce(s="", c in contexts | s + substring(c, 0, size(c)-2) +"\\n") as context
 RETURN context
 """
 
 embedding = OpenAIEmbeddings()
 
 
-def plot_search(description: str, k: int = 3) -> str:
+def plot_search(description: str, vector_top_k: int = 10, ranking_top_k: int = 5) -> str:
     embed_description = embedding.embed_query(description)
-    data = graph.query(
-        retrieval_query,
-        {"index": "moviePlotsEmbedding", "k": k, "embedding": embed_description},
-    )
+    params = {"index": "moviePlotsEmbedding", "vectorK": vector_top_k, "rankingK": ranking_top_k,
+              "embedding": embed_description}
+    print("====== PLOT QUERY START=========")
+    print(f'Params: {params} \n')
+    print(retrieval_query)
+    data = graph.query(retrieval_query, params)
+    print(data)
+    print("====== PLOT QUERY END =========")
     return "\n#Movie".join([el["context"] for el in data])
 
 
@@ -45,17 +52,17 @@ class PlotSearchTool(BaseTool):
     args_schema: Type[BaseModel] = PlotSearchInput
 
     def _run(
-        self,
-        movie_description: str,
-        run_manager: Optional[CallbackManagerForToolRun] = None,
+            self,
+            movie_description: str,
+            run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
         """Use the tool."""
         return plot_search(movie_description)
 
     async def _arun(
-        self,
-        movie_description: str,
-        run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+            self,
+            movie_description: str,
+            run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> str:
         """Use the tool."""
         return plot_search(movie_description)

@@ -19,7 +19,10 @@ recommendation_query_db_history = """
   // rank and limit recommendations
   WITH u, recommendation, count(*) AS count
   ORDER BY count DESC LIMIT 3
-  RETURN recommendation.title AS movie
+  RETURN "title: " + recommendation.title + 
+    //"\\nimage: " + coalesce(recommendation.poster, '') +
+    "\\nplot: " + coalesce(recommendation.plot, '') +
+    "\\nurl: " + coalesce(recommendation.url, '') AS movie
 """
 
 recommendation_query_genre = """
@@ -27,11 +30,14 @@ MATCH (m:Movie)-[:IN_GENRE]->(g:Genre {name:$genre})
 // filter out already seen movies by the user
 WHERE NOT EXISTS {
   (m)<-[:RATED]-(:User {userId:$user_id})
-}
+} AND m.imdbRating IS NOT NULL
 // rank and limit recommendations
 WITH m
 ORDER BY m.imdbRating DESC LIMIT 3
-RETURN m.title AS movie
+RETURN "title: " + m.title + 
+    //"\\nimage: " + coalesce(m.poster, '') + 
+    "\\nplot: " + coalesce(m.plot, '') +
+    "\\nurl: " + coalesce(m.url, '') AS movie
 """
 
 
@@ -47,7 +53,10 @@ AND NOT EXISTS {{
 // rank and limit recommendations
 WITH m2, count(*) AS count
 ORDER BY count DESC LIMIT 3
-RETURN m2.title As movie
+RETURN "title: " + m2.title + 
+    //"\\nimage: " + coalesce(m2.poster, '') +
+    "\\nplot: " + coalesce(m2.plot, '') +
+    "\\nurl: " + coalesce(m2.url, '') AS movie
 """
 
 
@@ -62,6 +71,10 @@ def recommend_movie(movie: Optional[str] = None, genre: Optional[str] = None) ->
     params = {"user_id": user_id, "genre": genre}
     if not movie and not genre:
         # Try to recommend a movie based on the information in the db
+        print("====== REC MOVIE BY DB HISTORY START =========")
+        print(f'Params: {params} \n')
+        print(recommendation_query_db_history)
+        print("====== REC MOVIE BY DB HISTORY END =========")
         response = graph.query(recommendation_query_db_history, params)
         try:
             return ", ".join([el["movie"] for el in response])
@@ -69,6 +82,10 @@ def recommend_movie(movie: Optional[str] = None, genre: Optional[str] = None) ->
             return "Can you tell us about some of the movies you liked?"
     if not movie and genre:
         # Recommend top voted movies in the genre the user haven't seen before
+        print("====== REC MOVIE BY TOP IN GENRE START =========")
+        print(f'Params: {params} \n')
+        print(recommendation_query_genre)
+        print("====== REC MOVIE BY TOP IN GENRE END =========")
         response = graph.query(recommendation_query_genre, params)
         try:
             return ", ".join([el["movie"] for el in response])
@@ -80,6 +97,10 @@ def recommend_movie(movie: Optional[str] = None, genre: Optional[str] = None) ->
         return "The movie you mentioned wasn't found in the database"
     params["movieTitles"] = [el["candidate"] for el in candidates]
     query = recommendation_query_movie(bool(genre))
+    print("====== REC MOVIE BY GENRE ONLY START =========")
+    print(f'Params: {params} \n')
+    print(query)
+    print("====== REC MOVIE BY GENRE ONLY END =========")
     response = graph.query(query, params)
     try:
         return ", ".join([el["movie"] for el in response])

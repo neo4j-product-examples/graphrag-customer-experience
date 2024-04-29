@@ -7,7 +7,7 @@ from streamlit.logger import get_logger
 
 logger = get_logger(__name__)
 
-st.title("Movie agent")
+st.title("Example App: Movie Search")
 
 
 class StreamHandler:
@@ -18,7 +18,7 @@ class StreamHandler:
 
     def new_token(self, token: str) -> None:
         self.text += token
-        self.container.markdown(self.text)
+        self.container.markdown(self.text, unsafe_allow_html=True)
 
     def new_status(self, status_update: str) -> None:
         status.update(label="Generating answer🤖", state="running", expanded=True)

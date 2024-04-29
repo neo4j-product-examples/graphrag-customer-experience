@@ -18,11 +18,14 @@ MATCH (m)-[r:ACTED_IN|DIRECTED|HAS_GENRE]-(t)
 WITH m, type(r) as type, collect(coalesce(t.name, t.title)) as names
 WITH m, type+": "+reduce(s="", n IN names | s + n + ", ") as types
 WITH m, collect(types) as contexts
-WITH m, "type:" + labels(m)[0] + "\ntitle: "+ coalesce(m.title, m.name) 
-       + "\nyear: "+coalesce(m.released,"") +"\n" +
-       reduce(s="", c in contexts | s + substring(c, 0, size(c)-2) +"\n") as context
+WITH m, "type:" + labels(m)[0] + "\\ntitle: "+ coalesce(m.title, m.name)
+       + "\\nurl: " + coalesce(m.url, '') 
+       + "\\nplot: " + coalesce(m.plot, '')
+       + "\\nyear: " + coalesce(m.released,"") +"\\n" +
+       reduce(s="", c in contexts | s + substring(c, 0, size(c)-2) +"\\n") as context
 RETURN context LIMIT 1
 """
+#+ "\nimage: " + coalesce(m.poster, '')
 
 
 def get_information(entity: str, type: str) -> str:
@@ -36,9 +39,12 @@ def get_information(entity: str, type: str) -> str:
             "Need additional information, which of these "
             f"did you mean: {newline + newline.join(str(d) for d in candidates)}"
         )
-    data = graph.query(
-        description_query, params={"candidate": candidates[0]["candidate"]}
-    )
+    params = {"candidate": candidates[0]["candidate"]}
+    print("====== INFORMATION QUERY START=========")
+    print(f'Params: {params} \n')
+    print(description_query)
+    print("====== INFORMATION QUERY END =========")
+    data = graph.query(description_query, params=params)
     return data[0]["context"]
 
 

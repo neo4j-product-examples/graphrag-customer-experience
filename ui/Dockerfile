@@ -15,6 +15,7 @@ COPY requirements.txt .
 RUN pip install --upgrade -r requirements.txt
 
 COPY main.py .
+COPY .streamlit/ .streamlit/
 
 EXPOSE 8501
 
