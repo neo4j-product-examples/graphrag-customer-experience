@@ -20,8 +20,8 @@ tools = [
     InformationTool(),
     RecommenderTool(),
     PlotSearchTool(),
-    #AggregationTool(),
-    MemoryTool()] #Memory module requires write permissions
+    AggregationTool(),
+    MemoryTool()]
 
 llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(t) for t in tools])
 

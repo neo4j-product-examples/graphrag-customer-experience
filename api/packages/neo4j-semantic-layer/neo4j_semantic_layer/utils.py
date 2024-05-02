@@ -1,8 +1,14 @@
 from typing import Dict, List
 
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.graphs import Neo4jGraph
+from langchain_community.vectorstores import Neo4jVector
 
+# general graph queries. Credentials read from env
 graph = Neo4jGraph()
+
+# vector index + graph traversal queries. Credentials read from env
+graph_vector_store = Neo4jVector(embedding=OpenAIEmbeddings())
 
 
 def get_user_id() -> int:

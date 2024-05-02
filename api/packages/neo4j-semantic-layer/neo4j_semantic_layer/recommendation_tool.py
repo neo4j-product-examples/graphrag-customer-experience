@@ -71,10 +71,6 @@ def recommend_movie(movie: Optional[str] = None, genre: Optional[str] = None) ->
     params = {"user_id": user_id, "genre": genre}
     if not movie and not genre:
         # Try to recommend a movie based on the information in the db
-        print("====== REC MOVIE BY DB HISTORY START =========")
-        print(f'Params: {params} \n')
-        print(recommendation_query_db_history)
-        print("====== REC MOVIE BY DB HISTORY END =========")
         response = graph.query(recommendation_query_db_history, params)
         try:
             return ", ".join([el["movie"] for el in response])
@@ -82,10 +78,6 @@ def recommend_movie(movie: Optional[str] = None, genre: Optional[str] = None) ->
             return "Can you tell us about some of the movies you liked?"
     if not movie and genre:
         # Recommend top voted movies in the genre the user haven't seen before
-        print("====== REC MOVIE BY TOP IN GENRE START =========")
-        print(f'Params: {params} \n')
-        print(recommendation_query_genre)
-        print("====== REC MOVIE BY TOP IN GENRE END =========")
         response = graph.query(recommendation_query_genre, params)
         try:
             return ", ".join([el["movie"] for el in response])
@@ -97,10 +89,6 @@ def recommend_movie(movie: Optional[str] = None, genre: Optional[str] = None) ->
         return "The movie you mentioned wasn't found in the database"
     params["movieTitles"] = [el["candidate"] for el in candidates]
     query = recommendation_query_movie(bool(genre))
-    print("====== REC MOVIE BY GENRE ONLY START =========")
-    print(f'Params: {params} \n')
-    print(query)
-    print("====== REC MOVIE BY GENRE ONLY END =========")
     response = graph.query(query, params)
     try:
         return ", ".join([el["movie"] for el in response])
