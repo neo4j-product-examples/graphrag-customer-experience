@@ -9,12 +9,19 @@ from langchain.schema import AIMessage, HumanMessage
 from langchain.tools.render import format_tool_to_openai_function
 from langchain_community.chat_models import ChatOpenAI
 
+from neo4j_semantic_layer.aggregation_tool import AggregationTool
 from neo4j_semantic_layer.information_tool import InformationTool
 from neo4j_semantic_layer.memory_tool import MemoryTool
+from neo4j_semantic_layer.plot_search_tool import PlotSearchTool
 from neo4j_semantic_layer.recommendation_tool import RecommenderTool
 
 llm = ChatOpenAI(temperature=0, model="gpt-4", streaming=True)
-tools = [InformationTool(), RecommenderTool(), MemoryTool()]
+tools = [
+    InformationTool(),
+    RecommenderTool(),
+    PlotSearchTool(),
+    AggregationTool(),
+    MemoryTool()]
 
 llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(t) for t in tools])
 
@@ -25,7 +32,9 @@ prompt = ChatPromptTemplate.from_messages(
             "You are a helpful assistant that finds information about movies "
             " and recommends them. If tools require follow up questions, "
             "make sure to ask the user for clarification. Make sure to include any "
-            "available options that need to be clarified in the follow up questions "
+            "available options that need to be clarified in the follow up questions. "
+            "Embed url links when made available. "
+            "briefly summarize, in 1 sentence, movie and person bio/plot info in your response where available."
             "Do only the things the user specifically requested. ",
         ),
         MessagesPlaceholder(variable_name="chat_history"),

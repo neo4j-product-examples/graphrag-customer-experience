@@ -1,8 +1,14 @@
 from typing import Dict, List
 
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.graphs import Neo4jGraph
+from langchain_community.vectorstores import Neo4jVector
 
+# general graph queries. Credentials read from env
 graph = Neo4jGraph()
+
+# vector index + graph traversal queries. Credentials read from env
+graph_vector_store = Neo4jVector(embedding=OpenAIEmbeddings())
 
 
 def get_user_id() -> int:
@@ -41,7 +47,7 @@ def remove_lucene_chars(text: str) -> str:
     return text.strip()
 
 
-def generate_full_text_query(input: str) -> str:
+def generate_full_text_query(input: str, type: str) -> str:
     """
     Generate a full-text search query for a given input string.
 
@@ -51,11 +57,12 @@ def generate_full_text_query(input: str) -> str:
     operator. Useful for mapping movies and people from user questions
     to database values, and allows for some misspelings.
     """
+    property_map = {"movie": "title", "person": "name"}
     full_text_query = ""
     words = [el for el in remove_lucene_chars(input).split() if el]
     for word in words[:-1]:
-        full_text_query += f" {word}~0.8 AND"
-    full_text_query += f" {words[-1]}~0.8"
+        full_text_query += f" {property_map[type]}:{word}~0.8 AND"
+    full_text_query += f" {property_map[type]}:{words[-1]}~0.8"
     return full_text_query.strip()
 
 
@@ -77,8 +84,9 @@ def get_candidates(input: str, type: str, limit: int = 3) -> List[Dict[str, str]
     matching the query, with each candidate being a dictionary containing their name
     (or title) and label (either 'Person' or 'Movie').
     """
-    ft_query = generate_full_text_query(input)
+    ft_query = generate_full_text_query(input, type)
     candidates = graph.query(
-        candidate_query, {"fulltextQuery": ft_query, "index": type, "limit": limit}
+        candidate_query,
+        {"fulltextQuery": ft_query, "index": type + "Fulltext", "limit": limit},
     )
     return candidates

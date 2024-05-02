@@ -4,7 +4,6 @@ from langchain.callbacks.manager import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-
 from langchain.pydantic_v1 import BaseModel, Field
 from langchain.tools import BaseTool
 
@@ -20,7 +19,10 @@ recommendation_query_db_history = """
   // rank and limit recommendations
   WITH u, recommendation, count(*) AS count
   ORDER BY count DESC LIMIT 3
-  RETURN recommendation.title AS movie
+  RETURN "title: " + recommendation.title + 
+    //"\\nimage: " + coalesce(recommendation.poster, '') +
+    "\\nplot: " + coalesce(recommendation.plot, '') +
+    "\\nurl: " + coalesce(recommendation.url, '') AS movie
 """
 
 recommendation_query_genre = """
@@ -28,11 +30,14 @@ MATCH (m:Movie)-[:IN_GENRE]->(g:Genre {name:$genre})
 // filter out already seen movies by the user
 WHERE NOT EXISTS {
   (m)<-[:RATED]-(:User {userId:$user_id})
-}
+} AND m.imdbRating IS NOT NULL
 // rank and limit recommendations
 WITH m
 ORDER BY m.imdbRating DESC LIMIT 3
-RETURN m.title AS movie
+RETURN "title: " + m.title + 
+    //"\\nimage: " + coalesce(m.poster, '') + 
+    "\\nplot: " + coalesce(m.plot, '') +
+    "\\nurl: " + coalesce(m.url, '') AS movie
 """
 
 
@@ -48,7 +53,10 @@ AND NOT EXISTS {{
 // rank and limit recommendations
 WITH m2, count(*) AS count
 ORDER BY count DESC LIMIT 3
-RETURN m2.title As movie
+RETURN "title: " + m2.title + 
+    //"\\nimage: " + coalesce(m2.poster, '') +
+    "\\nplot: " + coalesce(m2.plot, '') +
+    "\\nurl: " + coalesce(m2.url, '') AS movie
 """
 
 

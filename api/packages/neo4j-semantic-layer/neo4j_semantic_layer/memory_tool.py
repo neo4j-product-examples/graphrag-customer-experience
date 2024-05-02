@@ -27,10 +27,12 @@ def store_movie_rating(movie: str, rating: int):
     candidates = get_candidates(movie, "movie")
     if not candidates:
         return "This movie is not in our database"
-    response = graph.query(
-        store_rating_query,
-        params={"user_id": user_id, "candidates": candidates, "rating": rating},
-    )
+    params = {"user_id": user_id, "candidates": candidates, "rating": rating}
+    print("====== Store REC START =========")
+    print(f'Params: {params} \n')
+    print(store_rating_query)
+    print("====== STORE REC END =========")
+    response = graph.query(store_rating_query, params=params)
     try:
         return response[0]["response"]
     except Exception as e:
