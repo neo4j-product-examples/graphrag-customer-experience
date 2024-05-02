@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "movieagent"
+name = "support-example"
 version = "0.1.0"
 description = ""
-authors = ["Tomaz Bratanic <tomaz.bratanic@neo4j.com>"]
+authors = ["Zach Blumenfeld <zach.blumenfeld@neo4j.com>"]
 readme = "README.md"
 packages = [
     { include = "app" },
@@ -13,7 +13,7 @@ python = "^3.11"
 uvicorn = "^0.23.2"
 langserve = {extras = ["server"], version = ">=0.0.30"}
 pydantic = "<2"
-neo4j-semantic-layer = {path = "packages/neo4j-semantic-layer", develop = true}
+neo4j-chains = {path = "packages/neo4j-chains", develop = true}
 tiktoken = "^0.5.2"
 
 
