@@ -46,7 +46,7 @@ if st.session_state["generated"]:
 async def get_agent_response(
     input: str, stream_handler: StreamHandler, chat_history: Optional[List[Tuple]] = []
 ):
-    url = "http://localhost:8080/graphrag/"
+    url = "http://api:8080/graphrag/"
     st.session_state["generated"].append("")
     remote_runnable = RemoteRunnable(url)
     async for chunk in remote_runnable.astream_log(

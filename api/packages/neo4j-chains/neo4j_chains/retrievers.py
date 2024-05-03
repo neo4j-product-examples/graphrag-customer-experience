@@ -67,6 +67,7 @@ def retrieve_structured_info(prompt: str) -> str:
     """
     result = ""
     objects = extraction_chain.invoke({"question": prompt})
+    print(f"Search objects: {objects}")
     for obj in objects.names:
         response = graph.query(
             """CALL db.index.fulltext.queryNodes('entity', $query, {limit:2})
@@ -82,6 +83,7 @@ def retrieve_structured_info(prompt: str) -> str:
             """,
             {"query": generate_full_text_query(obj)},
         )
+        print(f'full text: {generate_full_text_query(obj)}')
         result += "\n".join([el['output'] for el in response])
     return result
 
