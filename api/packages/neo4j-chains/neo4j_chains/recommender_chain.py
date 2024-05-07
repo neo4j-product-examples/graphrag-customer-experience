@@ -1,14 +1,14 @@
 import json
-from collections import OrderedDict
-from typing import Any, Dict, Tuple
 
-from langchain_community.graphs import Neo4jGraph
-from langchain_community.vectorstores import Neo4jVector
+from typing import Any
+
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain.pydantic_v1 import BaseModel, Field
+from langchain.pydantic_v1 import BaseModel
+
+from neo4j_chains.post_filter_search_retriever import format_res_dicts
+from neo4j_chains.utils import graph, llm
 
 prompt = PromptTemplate.from_template("""
 You are a personal assistant named Sally for a fashion, home, and beauty company called HRM.
@@ -44,20 +44,6 @@ ORDER by score DESC LIMIT $resTopK"""
 
 vector_top_k = 30
 res_top_k = 20
-embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
-llm = ChatOpenAI(temperature=0, model_name='gpt-4', streaming=True)
-graph = Neo4jGraph()
-
-
-def format_res_dicts(d: Dict) -> Dict:
-    res = OrderedDict()
-    for k, v in d.items():
-        if k != "metadata":
-            res[k] = v
-    for k, v in d['metadata'].items():
-        if v is not None:
-            res[k] = v
-    return res
 
 
 def retriever(product_code):
