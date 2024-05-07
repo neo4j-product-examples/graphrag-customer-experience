@@ -18,7 +18,7 @@ write an email to {customerName}, one of your customers, to recommend and summar
 Please only mention the products listed in the context below. Do not come up with or add any new products to the list.
 The below candidates are recommended based on the purchase patterns of other customers in the HRM database.
 Select the best 4 to 5 product subset from the context that best match 
-the time of year: {timeofYear} and ther customers interests.
+the time of year: {timeofYear} and the customers interests.
 Each product comes with an https `url` field. 
 Make sure to provide that https url with descriptive name text in markdown for each product.
 

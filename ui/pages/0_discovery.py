@@ -3,6 +3,33 @@ import asyncio
 import streamlit as st
 from langserve import RemoteRunnable
 
+customer_examples = [
+    [
+        'Alex Smith',
+        'Oversized Sweaters',
+        'daae10780ecd14990ea190a1e9917da33fe96cd8cfa5e80b67b4600171aa77e0',
+        'Feb, 2024',
+    ],
+    [
+        'Robin Fischer',
+        'Oversized Sweaters',
+        '819f4eab1fd76b932fd403ae9f427de8eb9c5b64411d763bb26b5c8c3c30f16f',
+        'Feb, 2024'
+    ],
+    [
+        'Chris Johnson',
+        'Oversized Sweaters',
+        '44b0898ecce6cc1268dfdb0f91e053db014b973f67e34ed8ae28211410910693',
+        'Feb, 2024'
+    ],
+    [
+        'Robin Fischer',
+        'denim jeans',
+        '819f4eab1fd76b932fd403ae9f427de8eb9c5b64411d763bb26b5c8c3c30f16f',
+        'Feb, 2024'
+    ]
+]
+
 
 class StreamHandler:
     def __init__(self, container, status, initial_text=""):
@@ -20,13 +47,14 @@ class StreamHandler:
             st.write(status_update)
 
 
-async def get_chain_response(customer_interests: str, customer_name: str, time_of_year: str,
+async def get_chain_response(customer_interests: str,  customer_id: str, customer_name: str, time_of_year: str,
                              stream_handler: StreamHandler):
     url = "http://api:8080/generate-email/"
     remote_runnable = RemoteRunnable(url)
     async for chunk in remote_runnable.astream_log(
             {
                 'customer_interests': customer_interests,
+                'customer_id': customer_id,
                 'customer_name': customer_name,
                 'time_of_year': time_of_year
             }
@@ -43,39 +71,17 @@ async def get_chain_response(customer_interests: str, customer_name: str, time_o
 st.markdown(
     '''### Task: Generate fashion recommendations to pair with customer's recent purchases and interests given time of year.''')
 
-examples = [
-    [
-        'Alex Smith',
-        'Oversized Sweaters',
-        'Feb, 2024',
-    ],
-    [
-        'Robin Fischer',
-        'Oversized Sweaters',
-        'Feb, 2024'
-    ],
-    [
-        'Chris Johnson',
-        'Oversized Sweaters',
-        'Feb, 2024'
-    ],
-    [
-        'Robin Fischer',
-        'denim jeans',
-        'Feb, 2024'
-    ]
-]
-
-preset_example = st.selectbox("select an example case:", examples)
-
 with st.form('input_form'):
-    customer_name_input = st.text_input("customer name:", value=preset_example[0], key='customer_name_input')
-    customer_interests_input = st.text_input("recent purchase(s) and interest(s):", value=preset_example[1],
-                                             key='customer_interests_input')
-    time_of_year_input = st.text_input("time of year:", value=preset_example[2], key='time_of_year_input')
-    gen_content = st.form_submit_button('Generate Content')
+    with st.expander('User Context'):
+        preset_example = st.selectbox("select an example case:", customer_examples)
+        customer_name_input = st.text_input("customer name:", value=preset_example[0], key='customer_name_input')
+        customer_id_input = st.text_input("customerId:", value=preset_example[2], key='customer_id_input')
+        time_of_year_input = st.text_input("time of year:", value=preset_example[3], key='time_of_year_input')
 
-st.subheader("GraphRAG With Graph Vectors")
+    customer_interests_input = st.text_input("Search for products:", value=preset_example[1],
+                                             key='customer_interests_input')
+    gen_content = st.form_submit_button('search')
+
 if gen_content:
     status = st.status("Generating content🤖")
     stream_handler = StreamHandler(st.empty(), status)
@@ -85,6 +91,7 @@ if gen_content:
     # Run the asynchronous function within the event loop
     loop.run_until_complete(get_chain_response(
         customer_interests_input,
+        customer_id_input,
         customer_name_input,
         time_of_year_input,
         stream_handler))

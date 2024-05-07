@@ -1,9 +1,7 @@
 import streamlit as st
 from langserve import RemoteRunnable
 
-remote_runnable = RemoteRunnable("http://api:8080/search/")
-
-examples = [
+customer_examples = [
     [
         'Alex Smith',
         'Oversized Sweaters',
@@ -30,17 +28,21 @@ examples = [
     ]
 ]
 
-with st.expander('User Context'):
-    preset_example = st.selectbox("select an example case:", examples)
-    customer_name_input = st.text_input("customer name:", value=preset_example[0], key='customer_name_input')
-    customer_id_input = st.text_input("customerId:", value=preset_example[2], key='customer_id_input')
-    time_of_year_input = st.text_input("time of year:", value=preset_example[3], key='time_of_year_input')
+remote_runnable = RemoteRunnable("http://api:8080/search/")
 
-customer_interests_input = st.text_input("Search for products:", value=preset_example[1],
-                                         key='customer_interests_input')
+with st.form('input_form'):
+    with st.expander('User Context'):
+        preset_example = st.selectbox("select an example case:", customer_examples)
+        customer_name_input = st.text_input("customer name:", value=preset_example[0], key='customer_name_input')
+        customer_id_input = st.text_input("customerId:", value=preset_example[2], key='customer_id_input')
+        time_of_year_input = st.text_input("time of year:", value=preset_example[3], key='time_of_year_input')
+
+    customer_interests_input = st.text_input("Search for products:", value=preset_example[1],
+                                             key='customer_interests_input')
+    gen_content = st.form_submit_button('search')
 
 n_cards_per_row = 3
-if customer_interests_input:
+if gen_content:
     search_results = remote_runnable.invoke({
         'customer_interests': customer_interests_input,
         'time_of_year': time_of_year_input,
