@@ -30,8 +30,6 @@ examples = [
     ]
 ]
 
-
-
 with st.expander('User Context'):
     preset_example = st.selectbox("select an example case:", examples)
     customer_name_input = st.text_input("customer name:", value=preset_example[0], key='customer_name_input')
@@ -53,15 +51,23 @@ if customer_interests_input:
         i = k % n_cards_per_row
         if i == 0:
             st.write("---")
-            cols = st.columns(n_cards_per_row, gap="large")
+            cols = st.columns(n_cards_per_row)
         # draw the card
         with cols[k % n_cards_per_row]:
-            with st.container(height=500):
+            with st.container(height=300):
                 inner_col1, inner_col2 = st.columns(2)
                 with inner_col1:
                     st.markdown(f" Image to go here")
                     # st.image(f'img/{row["prodName"][:-4]}.jpg')
                 with inner_col2:
+                    product_page_url = 'http://localhost:8501/product?' + \
+                                   '&'.join([f'product_code={row["productCode"]}',
+                                             f'customer_name={customer_name_input}',
+                                             f'interests={customer_interests_input}',
+                                             f'customer_id={customer_id_input}',
+                                             f'time_of_year={time_of_year_input}'
+                                             ])
                     st.markdown(f" ## {row['prodName'].strip()}")
                     st.markdown(f" ### {row['productTypeName'].strip()}")
                 st.markdown(f"**{row['detailDesc']}**")
+                st.link_button("See More", product_page_url)
