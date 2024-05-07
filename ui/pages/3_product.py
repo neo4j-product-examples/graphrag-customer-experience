@@ -63,23 +63,20 @@ product_code = get_query_param('product_code')
 if product_code:
     customer_name = get_query_param("customer_name", "name unknown")
     customer_interests = get_query_param("interests")
-    customer_id = get_query_param("customer_id", "")
     time_of_year = get_query_param("time_of_year", str(datetime.today()))
 
     product = get_product(product_code)
     if not customer_interests:
         customer_interests = product['detailDesc']
     with st.container():
-        inner_col1, inner_col2 = st.columns(2)
-        with inner_col1:
-            st.markdown(f" Image to go here")
-            for article in product["articleVariants"]:
-                st.image(
-                    f'https://storage.cloud.google.com/neo4j-app-images/hm-articles/images/{article["articleId"]}.jpg')
-        with inner_col2:
-            st.markdown(f" ## {product['prodName'].strip()}")
-            st.markdown(f" ### {product['productTypeName'].strip()}")
-        st.markdown(f"**{product['detailDesc']}**")
+        st.markdown(f" ## {product['prodName']}")
+        st.markdown(f"{product['detailDesc']}")
+        image_urls = []
+        for article in product["articleVariants"][:5]:
+            image_urls.append(
+                f'https://storage.cloud.google.com/neo4j-app-images/hm-articles/images/{article["articleId"]}.jpg')
+        st.image(image_urls, width=70)
+
 
     status = st.status("Generating content🤖")
     stream_handler = StreamHandler(st.empty(), status)
