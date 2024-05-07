@@ -59,8 +59,8 @@ if gen_content:
             with st.container(height=300):
                 inner_col1, inner_col2 = st.columns(2)
                 with inner_col1:
-                    st.markdown(f" Image to go here")
-                    # st.image(f'img/{row["prodName"][:-4]}.jpg')
+                    for article in row["articleVariants"]:
+                        st.image(f'https://storage.cloud.google.com/neo4j-app-images/hm-articles/images/{article["articleId"]}.jpg')
                 with inner_col2:
                     product_page_url = 'http://localhost:8501/product?' + \
                                    '&'.join([f'product_code={row["productCode"]}',

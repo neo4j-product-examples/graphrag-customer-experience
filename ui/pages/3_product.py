@@ -73,7 +73,9 @@ if product_code:
         inner_col1, inner_col2 = st.columns(2)
         with inner_col1:
             st.markdown(f" Image to go here")
-            # st.image(f'img/{row["prodName"][:-4]}.jpg')
+            for article in product["articleVariants"]:
+                st.image(
+                    f'https://storage.cloud.google.com/neo4j-app-images/hm-articles/images/{article["articleId"]}.jpg')
         with inner_col2:
             st.markdown(f" ## {product['prodName'].strip()}")
             st.markdown(f" ### {product['productTypeName'].strip()}")
