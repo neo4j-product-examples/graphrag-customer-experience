@@ -4,6 +4,7 @@ from collections import OrderedDict
 from operator import itemgetter
 from typing import List, Tuple, Any, Dict
 
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
 from langchain.pydantic_v1 import BaseModel, Field
@@ -13,7 +14,7 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel, RunnablePassthrough
 
 from neo4j_chains.condense_question_chain import condense_question
-from neo4j_chains.utils import embedding_model, llm, format_doc
+from neo4j_chains.utils import llm, format_doc
 
 template = (
     "You are an assistant that helps customers with their questions. "
@@ -43,16 +44,17 @@ neo4j_username = os.getenv('SUPPORT_NEO4J_USERNAME')
 neo4j_password = os.getenv('SUPPORT_NEO4J_PASSWORD')
 neo4j_database_name = os.getenv('SUPPORT_NEO4J_DATABASE')
 
-vector_index_name = 'text_embedding'
 vector_top_k = 4
 
+vector_retrieval_query = """RETURN node.text AS text, score, node {.*, text: Null, embedding: Null} AS metadata"""
 vector_store = Neo4jVector.from_existing_index(
-    embedding=embedding_model,
+    embedding=SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2"),
     url=neo4j_url,
     username=neo4j_username,
     password=neo4j_password,
     database=neo4j_database_name,
-    index_name=vector_index_name
+    index_name="vector",
+    retrieval_query=vector_retrieval_query
 )
 
 support_graph = Neo4jGraph(
@@ -64,6 +66,9 @@ support_graph = Neo4jGraph(
 
 
 def format_docs(docs: List[Document]) -> str:
+    print("///////////// DOCS /////////////////")
+    print(json.dumps([format_doc(d) for d in docs]))
+    print("///////////// END DOCS /////////////////")
     return json.dumps([format_doc(d) for d in docs], indent=1)
 
 
@@ -77,6 +82,9 @@ def retrieve_rules(docs: List[Document]) -> str:
     MATCH (n)-[r]->(m)
     RETURN n.id + ' - ' + type(r) +  ' -> ' + m.id AS rule ORDER BY rule
     """, params={'chunkIds': doc_chunk_ids})
+    print("///////////// RULES /////////////////")
+    print([r['rule'] for r in res])
+    print("///////////// END RULES /////////////////")
     return '\n'.join([r['rule'] for r in res])
 
 
@@ -91,12 +99,6 @@ class Output(BaseModel):
     output: Any
 
 
-def print_pass(x):
-    print(x)
-    print(type(x))
-    return x
-
-
 prompt = ChatPromptTemplate.from_template(template)
 
 qa_chain = (
@@ -104,8 +106,8 @@ qa_chain = (
             "vectorStoreResults": condense_question | vector_store.as_retriever(search_kwargs={'k': vector_top_k}),
             "question": RunnablePassthrough()})
         | RunnableParallel({
-            "rules": lambda x: x["vectorStoreResults"] | retrieve_rules,
-            "additionalContext": lambda x: x["vectorStoreResults"] | format_docs,
+            "rules": (lambda x: x["vectorStoreResults"]) | RunnableLambda(retrieve_rules),
+            "additionalContext": (lambda x: x["vectorStoreResults"]) | RunnableLambda(format_docs),
             "question": lambda x: x["question"]})
         | prompt
         | llm
