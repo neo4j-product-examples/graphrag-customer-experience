@@ -3,10 +3,11 @@ from typing import Dict
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
-from neo4j_chains.utils import graph
+from neo4j_chains.queries import fetch_product
 from neo4j_chains.email_chain import content_chain
 from neo4j_chains.search_chain import search_chain
 from neo4j_chains.recommender_chain import recommendation_chain
+from neo4j_chains.support_chain import qa_chain
 app = FastAPI()
 
 
@@ -16,24 +17,15 @@ async def redirect_root_to_docs():
 
 
 @app.get("/product/")
-def fetch_product(product_code: int) -> Dict:
-    """
-    Fetches a product by product code.
-    """
-    data = graph.query("""
-    MATCH (p:Product {productCode:$productCode})<-[:VARIANT_OF]-(a:Article)
-    WITH p, collect({colourGroup: a.colourGroupName, graphicalAppearance: a.graphicalAppearanceName, 
-            articleId:a.articleId}) AS articleVariants
-    RETURN p {.*, `text`: Null, `textEmbedding`: Null, id: Null, articleVariants} AS product
-    """, params={'productCode': product_code})
-    return data[0]
+def get_product(product_code: int) -> Dict:
+    return fetch_product(product_code)
 
 
 # Edit this to add the chain you want to add
 add_routes(app, content_chain, path="/generate-email")
 add_routes(app, search_chain, path="/search")
 add_routes(app, recommendation_chain, path="/generate-recommendations")
-# add_routes(app, question_answer_chain, path="/support")
+add_routes(app, qa_chain, path="/support")
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,15 +1,19 @@
+import json
 import os
-from typing import List, Tuple, Any
+from collections import OrderedDict
+from operator import itemgetter
+from typing import List, Tuple, Any, Dict
 
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
 from langchain.pydantic_v1 import BaseModel, Field
+from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel, RunnablePassthrough
 
 from neo4j_chains.condense_question_chain import condense_question
-from neo4j_chains.utils import embedding_model, llm
+from neo4j_chains.utils import embedding_model, llm, format_doc
 
 template = (
     "You are an assistant that helps customers with their questions. "
@@ -39,10 +43,17 @@ neo4j_username = os.getenv('SUPPORT_NEO4J_USERNAME')
 neo4j_password = os.getenv('SUPPORT_NEO4J_PASSWORD')
 neo4j_database_name = os.getenv('SUPPORT_NEO4J_DATABASE')
 
-vector_index_name = 'TBD'
-graph_retrieval_query = 'TBD'
-vector_top_k = 20
-res_top_k = 20
+vector_index_name = 'text_embedding'
+vector_top_k = 4
+
+vector_store = Neo4jVector.from_existing_index(
+    embedding=embedding_model,
+    url=neo4j_url,
+    username=neo4j_username,
+    password=neo4j_password,
+    database=neo4j_database_name,
+    index_name=vector_index_name
+)
 
 support_graph = Neo4jGraph(
     url=neo4j_url,
@@ -51,15 +62,22 @@ support_graph = Neo4jGraph(
     database=neo4j_database_name
 )
 
-vector_store = Neo4jVector.from_existing_index(
-    embedding=embedding_model,
-    url=neo4j_url,
-    username=neo4j_username,
-    password=neo4j_password,
-    database=neo4j_database_name,
-    index_name=vector_index_name,
-    retrieval_query=graph_retrieval_query
-)
+
+def format_docs(docs: List[Document]) -> str:
+    return json.dumps([format_doc(d) for d in docs], indent=1)
+
+
+def retrieve_rules(docs: List[Document]) -> str:
+    doc_chunk_ids = [doc.metadata['id'] for doc in docs]
+    res = support_graph.query("""
+    UNWIND $chunkIds AS chunkId
+    MATCH(chunk {id:chunkId})-[:HAS_ENTITY]->()-[rl:!HAS_ENTITY]-{1,5}()
+    UNWIND rl AS r
+    WITH DISTINCT r
+    MATCH (n)-[r]->(m)
+    RETURN n.id + ' - ' + type(r) +  ' -> ' + m.id AS rule ORDER BY rule
+    """, params={'chunkIds': doc_chunk_ids})
+    return '\n'.join([r['rule'] for r in res])
 
 
 class ChainInput(BaseModel):
@@ -82,12 +100,13 @@ def print_pass(x):
 prompt = ChatPromptTemplate.from_template(template)
 
 qa_chain = (
-        RunnableParallel(
-            {
-                "context": condense_question | vector_store.as_retriever(search_kwargs={'k': vector_top_k}),
-                "question": RunnablePassthrough(),
-            }
-        )
+        RunnableParallel({
+            "vectorStoreResults": condense_question | vector_store.as_retriever(search_kwargs={'k': vector_top_k}),
+            "question": RunnablePassthrough()})
+        | RunnableParallel({
+            "rules": lambda x: x["vectorStoreResults"] | retrieve_rules,
+            "additionalContext": lambda x: x["vectorStoreResults"] | format_docs,
+            "question": lambda x: x["question"]})
         | prompt
         | llm
         | StrOutputParser()

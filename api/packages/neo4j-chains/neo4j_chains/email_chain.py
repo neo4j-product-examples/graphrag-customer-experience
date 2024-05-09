@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from langchain.pydantic_v1 import BaseModel
 
-from neo4j_chains.post_filter_search_retriever import search_retriever
+from neo4j_chains.queries import search_retriever
 from neo4j_chains.utils import llm
 
 prompt = PromptTemplate.from_template("""
