@@ -5,6 +5,7 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
 embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 llm = ChatOpenAI(temperature=0, model_name='gpt-4', streaming=True)
+small_llm = ChatOpenAI(temperature=0, model_name='gpt-3.5-turbo', streaming=True)
 graph = Neo4jGraph()
 
 

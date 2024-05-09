@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 from neo4j_chains.utils import graph
-from neo4j_chains.content_generator import content_chain
-from neo4j_chains.product_search import search_chain
+from neo4j_chains.email_chain import content_chain
+from neo4j_chains.search_chain import search_chain
 from neo4j_chains.recommender_chain import recommendation_chain
 app = FastAPI()
 
