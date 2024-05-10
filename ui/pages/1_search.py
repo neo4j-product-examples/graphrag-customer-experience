@@ -68,7 +68,7 @@ if gen_content:
         # draw the card
         with cols[k % n_cards_per_row]:
             with st.container(height=300):
-                product_page_url = 'http://localhost:8501/product?' + \
+                product_page_url = 'http://localhost:8501/recommendations?' + \
                                    '&'.join([f'product_code={row["productCode"]}',
                                              f'customer_name={quote_plus(customer_name_input)}',
                                              f'interests={quote_plus(customer_interests_input)}',

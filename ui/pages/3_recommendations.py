@@ -111,10 +111,10 @@ if product_code:
 else:
     st.markdown('This page requires query parameters to generate recommendations. Below are some examples. '
                 'Use these links to experiment. \n'
-                '* http://localhost:8501/product?product_code=842001&customer_name=Alex+Smith&interests=Oversized'
-                '+Sweaters&time_of_year=Feb%2C+2024 \n'
-                '* http://localhost:8501/product?product_code=598423&customer_name=Robin+Fischer&interests=denim'
-                '+jeans&time_of_year=Feb%2C+2024')
+                '* http://localhost:8501/recommendations?product_code=842001&customer_name=Alex+Smith&interests'
+                '=Oversized+Sweaters&time_of_year=Feb%2C+2024 \n'
+                '* http://localhost:8501/recommendations?product_code=598423&customer_name=Robin+Fischer&interests'
+                '=denim+jeans&time_of_year=Feb%2C+2024')
     st.markdown('You can also generate this page for any product and search context from the [search page]('
                 'http://localhost:8501/search). Just click on the titles of any product in the search results.')
 
