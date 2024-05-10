@@ -3,6 +3,15 @@ from urllib.parse import quote_plus
 import streamlit as st
 from langserve import RemoteRunnable
 
+st.set_page_config(layout="wide")
+st.title("Search")
+st.subheader("Increase Conversion with Tailored Semantic Search")
+st.markdown(":gray[Similar to Discovery, "
+            "GraphRAG integrates customer purchasing patterns with "
+            "unstructured product descriptions for "
+            "personalized semantic search.]")
+st.markdown('__Product Search:__')
+
 customer_examples = [
     [
         'Alex Smith',
@@ -29,7 +38,6 @@ customer_examples = [
         'Feb, 2024'
     ]
 ]
-st.set_page_config(layout="wide")
 
 remote_runnable = RemoteRunnable("http://api:8080/search/")
 

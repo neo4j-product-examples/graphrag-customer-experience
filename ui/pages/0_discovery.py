@@ -3,6 +3,14 @@ import asyncio
 import streamlit as st
 from langserve import RemoteRunnable
 
+st.set_page_config(layout="wide")
+st.title("Discovery")
+st.subheader("Improve Click-Through Rate with Personalized Marketing")
+st.markdown(":gray[GraphRAG combines structured customer data with "
+            "unstructured search and text descriptions to customize "
+            "AI-generated content for every customer.]")
+
+st.markdown('__GraphRAG Email Generation:__')
 customer_examples = [
     [
         'Alex Smith',
@@ -68,22 +76,19 @@ async def get_chain_response(customer_interests: str,  customer_id: str, custome
             stream_handler.new_token(value)
 
 
-st.markdown(
-    '''### Task: Generate fashion recommendations to pair with customer's recent purchases and interests given time of year.''')
-
 with st.form('input_form'):
-    with st.expander('User Context'):
+    with st.expander('Customer Context'):
         preset_example = st.selectbox("select an example case:", customer_examples)
         customer_name_input = st.text_input("customer name:", value=preset_example[0], key='customer_name_input')
         customer_id_input = st.text_input("customerId:", value=preset_example[2], key='customer_id_input')
         time_of_year_input = st.text_input("time of year:", value=preset_example[3], key='time_of_year_input')
 
-    customer_interests_input = st.text_input("Search for products:", value=preset_example[1],
+    customer_interests_input = st.text_input("customer interests:", value=preset_example[1],
                                              key='customer_interests_input')
-    gen_content = st.form_submit_button('search')
+    gen_content = st.form_submit_button('Generate')
 
 if gen_content:
-    status = st.status("Generating content🤖")
+    status = st.status("Generating email 🤖")
     stream_handler = StreamHandler(st.empty(), status)
     # Create an event loop: this is needed to run asynchronous functions
     loop = asyncio.new_event_loop()

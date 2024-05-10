@@ -7,8 +7,13 @@ from streamlit.logger import get_logger
 
 logger = get_logger(__name__)
 
-st.title("Customer Support")
 
+st.set_page_config(layout="wide")
+st.title("Customer Support")
+st.subheader("Reduce Cost to Serve with Well-Grounded, Fact-Based, AI Scripts")
+st.markdown(":gray[GraphRAG provides explicit rules from a knowledge graph to improve the "
+            "explainability, transparency, and accuracy of AI scripts and agents.]")
+st.markdown('__AI Support:__')
 
 class StreamHandler:
     def __init__(self, container, initial_text=""):

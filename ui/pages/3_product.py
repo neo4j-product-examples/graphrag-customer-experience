@@ -6,6 +6,15 @@ import requests
 from langserve import RemoteRunnable
 
 
+st.set_page_config(layout="wide", page_title='Recommendations')
+st.title("Recommendations")
+st.subheader("Increase Average Order Value with Customized Recommendations")
+st.markdown(":gray[GraphRAG integrates graph embeddings of customer purchase behavior, "
+            "user browsing history, and the creativity of LLMs "
+            "to generate targeted recommendations.]")
+st.markdown('__Product Recommendations:__')
+
+
 def get_product(product_code):
     response = requests.get(f'http://api:8080/product/?product_code={product_code}')
     if response.status_code == 200:
@@ -13,7 +22,8 @@ def get_product(product_code):
     else:
         raise RuntimeError("Failed to fetch data from the server.")
 
-def get_query_param(key:str , default = None):
+
+def get_query_param(key: str, default=None):
     if key in st.query_params:
         return st.query_params[key]
     return default
@@ -33,6 +43,7 @@ class StreamHandler:
         status.update(label="Generating answer🤖", state="running", expanded=True)
         with status:
             st.write(status_update)
+
 
 async def get_chain_response(product_code: int,
                              customer_name: str,
@@ -59,6 +70,7 @@ async def get_chain_response(product_code: int,
         elif isinstance(value, str) and "ChatOpenAI" in log_entry["path"]:
             stream_handler.new_token(value)
 
+
 product_code = get_query_param('product_code')
 if product_code:
     customer_name = get_query_param("customer_name", "name unknown")
@@ -77,8 +89,7 @@ if product_code:
                 f'https://storage.cloud.google.com/neo4j-app-images/hm-articles/images/{article["articleId"]}.jpg')
         st.image(image_urls, width=70)
 
-
-    status = st.status("Generating content🤖")
+    status = st.status("Generating recommendations🤖")
     stream_handler = StreamHandler(st.empty(), status)
     # Create an event loop: this is needed to run asynchronous functions
     loop = asyncio.new_event_loop()
@@ -94,3 +105,16 @@ if product_code:
     # Close the event loop
     loop.close()
     status.update(label="Finished!", state="complete", expanded=False)
+    st.markdown('---\n:green[You can generate recommendations for any other product and search context '
+                'from the] :blue[[search page](http://localhost:8501/search)]:green[. '
+                'Just click on the titles of any product in the search results.]')
+else:
+    st.markdown('This page requires query parameters to generate recommendations. Below are some examples. '
+                'Use these links to experiment. \n'
+                '* http://localhost:8501/product?product_code=842001&customer_name=Alex+Smith&interests=Oversized'
+                '+Sweaters&time_of_year=Feb%2C+2024 \n'
+                '* http://localhost:8501/product?product_code=598423&customer_name=Robin+Fischer&interests=denim'
+                '+jeans&time_of_year=Feb%2C+2024')
+    st.markdown('You can also generate this page for any product and search context from the [search page]('
+                'http://localhost:8501/search). Just click on the titles of any product in the search results.')
+
