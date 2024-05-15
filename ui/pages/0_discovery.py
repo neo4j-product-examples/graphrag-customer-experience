@@ -4,13 +4,15 @@ import streamlit as st
 from langserve import RemoteRunnable
 
 st.set_page_config(layout="wide")
+
 st.title("Discovery")
 st.subheader("Improve Click-Through Rate with Personalized Marketing")
 st.markdown(":gray[GraphRAG combines structured customer data with "
             "unstructured search and text descriptions to customize "
             "AI-generated content for every customer.]")
 
-st.markdown('__GraphRAG Email Generation:__')
+st.markdown('#### GraphRAG Email Generation:')
+
 customer_examples = [
     [
         'Alex Smith',
@@ -75,31 +77,33 @@ async def get_chain_response(customer_interests: str,  customer_id: str, custome
         elif isinstance(value, str) and "ChatOpenAI" in log_entry["path"]:
             stream_handler.new_token(value)
 
+col1, col2 = st.columns([0.35, 0.65])
+with col1:
+    with st.form('input_form'):
+        #preset_example = st.selectbox("example cases:", customer_examples)
+        customer_name_input = st.text_input("customer name:", value=customer_examples[0][0], key='customer_name_input')
+        customer_id_input = st.text_input("customerId:", value=customer_examples[0][2], key='customer_id_input')
+        time_of_year_input = st.text_input("time of year:", value=customer_examples[0][3], key='time_of_year_input')
+        customer_interests_input = st.text_input("customer interests:", value=customer_examples[0][1],
+                                                 key='customer_interests_input')
+        gen_content = st.form_submit_button('Generate')
 
-with st.form('input_form'):
-    with st.expander('Customer Context'):
-        preset_example = st.selectbox("select an example case:", customer_examples)
-        customer_name_input = st.text_input("customer name:", value=preset_example[0], key='customer_name_input')
-        customer_id_input = st.text_input("customerId:", value=preset_example[2], key='customer_id_input')
-        time_of_year_input = st.text_input("time of year:", value=preset_example[3], key='time_of_year_input')
+with col2:
+    if gen_content:
+        with st.chat_message("ai"): #, avatar="🤖"):
+            status = st.status("Generating email")
+            stream_handler = StreamHandler(st.empty(), status)
+            # Create an event loop: this is needed to run asynchronous functions
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            # Run the asynchronous function within the event loop
+            loop.run_until_complete(get_chain_response(
+                customer_interests_input,
+                customer_id_input,
+                customer_name_input,
+                time_of_year_input,
+                stream_handler))
+            # Close the event loop
+            loop.close()
+            status.update(label="Finished!", state="complete", expanded=False)
 
-    customer_interests_input = st.text_input("customer interests:", value=preset_example[1],
-                                             key='customer_interests_input')
-    gen_content = st.form_submit_button('Generate')
-
-if gen_content:
-    status = st.status("Generating email 🤖")
-    stream_handler = StreamHandler(st.empty(), status)
-    # Create an event loop: this is needed to run asynchronous functions
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    # Run the asynchronous function within the event loop
-    loop.run_until_complete(get_chain_response(
-        customer_interests_input,
-        customer_id_input,
-        customer_name_input,
-        time_of_year_input,
-        stream_handler))
-    # Close the event loop
-    loop.close()
-    status.update(label="Finished!", state="complete", expanded=False)
