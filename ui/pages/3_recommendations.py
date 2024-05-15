@@ -30,19 +30,13 @@ def get_query_param(key: str, default=None):
 
 
 class StreamHandler:
-    def __init__(self, container, status, initial_text=""):
-        self.status = status
+    def __init__(self, container, initial_text=""):
         self.container = container
         self.text = initial_text
 
     def new_token(self, token: str) -> None:
         self.text += token
         self.container.markdown(self.text, unsafe_allow_html=True)
-
-    def new_status(self, status_update: str) -> None:
-        status.update(label="Generating answer🤖", state="running", expanded=True)
-        with status:
-            st.write(status_update)
 
 
 async def get_chain_response(product_code: int,
@@ -53,7 +47,7 @@ async def get_chain_response(product_code: int,
                              stream_handler: StreamHandler):
     url = "http://api:8080/generate-recommendations/"
     remote_runnable = RemoteRunnable(url)
-    async for chunk in remote_runnable.astream_log(
+    async for data in remote_runnable.astream(
             {
                 'product_code': product_code,
                 'customer_name': customer_name,
@@ -62,13 +56,7 @@ async def get_chain_response(product_code: int,
                 'time_of_year': time_of_year
             }
     ):
-        log_entry = chunk.ops[0]
-        value = log_entry.get("value")
-        if isinstance(value, dict) and isinstance(value.get("steps"), list):
-            for step in value.get("steps"):
-                stream_handler.new_status(step["action"].log.strip("\n"))
-        elif isinstance(value, str) and "ChatOpenAI" in log_entry["path"]:
-            stream_handler.new_token(value)
+        stream_handler.new_token(data)
 
 
 product_code = get_query_param('product_code')
@@ -90,7 +78,7 @@ if product_code:
         st.image(image_urls, width=70)
 
     status = st.status("Generating recommendations🤖")
-    stream_handler = StreamHandler(st.empty(), status)
+    stream_handler = StreamHandler(st.empty())
     # Create an event loop: this is needed to run asynchronous functions
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
