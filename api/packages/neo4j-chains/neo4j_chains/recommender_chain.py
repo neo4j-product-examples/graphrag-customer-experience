@@ -8,7 +8,7 @@ from langchain_core.runnables import RunnableLambda, RunnableParallel
 from langchain.pydantic_v1 import BaseModel
 
 from neo4j_chains.queries import format_res_dicts
-from neo4j_chains.utils import graph, llm
+from neo4j_chains.utils import graph, llm, vector_store, format_docs
 
 prompt = PromptTemplate.from_template("""
 You are a personal assistant named Sally for a fashion, home, and beauty company called HRM.
@@ -82,4 +82,28 @@ recommendation_chain = (
         | llm
         | StrOutputParser()).with_types(
     input_type=RecommendationChainInput,
+    output_type=RecommendationChainOutput)
+
+
+class RecommendationChainInputTextOnly(BaseModel):
+    customer_name: str
+    product_description: str
+    customer_interests: str
+    time_of_year: str
+
+
+recommendation_text_vector_only_chain = (
+        RunnableParallel(
+            {'context': (lambda x: f"{x['customer_interests']}: {x['product_description']}")
+                        | vector_store.as_retriever(search_kwargs={"k": vector_top_k})
+                        | RunnableLambda(format_docs),
+             'customerName': (lambda x: x['customer_name']),
+             'productDescription': (lambda x: x['product_description']),
+             'customerInterests': (lambda x: x['customer_interests']),
+             'timeofYear': (lambda x: x['time_of_year']),
+             })
+        | prompt
+        | llm
+        | StrOutputParser()).with_types(
+    input_type=RecommendationChainInputTextOnly,
     output_type=RecommendationChainOutput)

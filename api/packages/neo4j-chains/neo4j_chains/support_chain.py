@@ -67,7 +67,7 @@ support_graph = Neo4jGraph(
 
 def format_docs(docs: List[Document]) -> str:
     print("///////////// DOCS /////////////////")
-    print(json.dumps([format_doc(d) for d in docs]))
+    #print(json.dumps([format_doc(d) for d in docs]))
     print("///////////// END DOCS /////////////////")
     return json.dumps([format_doc(d) for d in docs], indent=1)
 
