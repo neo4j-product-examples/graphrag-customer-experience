@@ -1,11 +1,10 @@
 from typing import List, Tuple
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableBranch, RunnableLambda, RunnablePassthrough
 
-small_llm = ChatOpenAI(temperature=0, model_name='gpt-3.5-turbo', streaming=True)
+from neo4j_chains.utils import small_llm
 
 condense_template = """Given the following conversation and a follow up question, 
 rephrase the follow up question to be a standalone question, in its original language.
@@ -41,7 +40,3 @@ condense_question = RunnableBranch(
     # Else, we have no chat history, so just pass through the question
     RunnableLambda(lambda x: x["input"]),
 )
-
-
-
-

@@ -7,23 +7,22 @@ from streamlit.logger import get_logger
 
 logger = get_logger(__name__)
 
-st.title("Example GraphRAG App")
+st.set_page_config(layout="wide")
+st.title("Customer Support")
+st.subheader("Reduce Cost to Serve with Well-Grounded, Fact-Based, AI Scripts")
+st.markdown(":gray[GraphRAG provides explicit rules from a knowledge graph to improve the "
+            "explainability, transparency, and accuracy of AI scripts and agents.]")
+st.markdown('__AI Support:__')
 
 
 class StreamHandler:
-    def __init__(self, container, status, initial_text=""):
-        self.status = status
+    def __init__(self, container, initial_text=""):
         self.container = container
         self.text = initial_text
 
     def new_token(self, token: str) -> None:
         self.text += token
         self.container.markdown(self.text, unsafe_allow_html=True)
-
-    def new_status(self, status_update: str) -> None:
-        status.update(label="Generating answer🤖", state="running", expanded=True)
-        with status:
-            st.write(status_update)
 
 
 # Initialize chat history
@@ -44,22 +43,14 @@ if st.session_state["generated"]:
 
 
 async def get_agent_response(
-    input: str, stream_handler: StreamHandler, chat_history: Optional[List[Tuple]] = []
+        input: str, stream_handler: StreamHandler, chat_history: Optional[List[Tuple]] = []
 ):
-    url = "http://localhost:8080/graphrag/"
+    url = "http://api:8080/support/"
     st.session_state["generated"].append("")
     remote_runnable = RemoteRunnable(url)
-    async for chunk in remote_runnable.astream_log(
-        {"input": input, "chat_history": chat_history}
-    ):
-        log_entry = chunk.ops[0]
-        value = log_entry.get("value")
-        if isinstance(value, dict) and isinstance(value.get("steps"), list):
-            for step in value.get("steps"):
-                stream_handler.new_status(step["action"].log.strip("\n"))
-        elif isinstance(value, str) and "ChatOpenAI" in log_entry["path"]:
-            st.session_state["generated"][-1] += value
-            stream_handler.new_token(value)
+    async for data in remote_runnable.astream({"input": input, "chat_history": chat_history}):
+        stream_handler.new_token(data)
+        st.session_state["generated"][-1] += data
 
 
 def generate_history():
@@ -76,13 +67,13 @@ def generate_history():
 
 
 # Accept user input
-if prompt := st.chat_input("How can I help you today?"):
+prompt = st.chat_input("How can I help you today?")
+if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
     with st.chat_message("assistant"):
-        status = st.status("Generating answer🤖")
-        stream_handler = StreamHandler(st.empty(), status)
-
+        status = st.status(label="Generating answer🤖", state="running", expanded=False)
+        stream_handler = StreamHandler(st.empty())
     chat_history = generate_history()
     # Create an event loop: this is needed to run asynchronous functions
     loop = asyncio.new_event_loop()
