@@ -1,4 +1,5 @@
 # GraphRAG Customer Experience Example
+### __:warning: This Repo is Work in Progress :warning:__
 
 This project demonstrates how to implement GraphRAG for various touch points in the customer journey including:
 
