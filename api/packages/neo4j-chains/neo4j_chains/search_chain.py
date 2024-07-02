@@ -21,7 +21,7 @@ Select the best 4 to 5 product subset from the context that best match the time 
 {context}
 """)
 
-vector_top_k = 20
+vector_top_k = 100
 res_top_k = 20
 
 

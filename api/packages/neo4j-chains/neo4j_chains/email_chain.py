@@ -26,7 +26,7 @@ Make sure to provide that https url with descriptive name text in markdown for e
 {context}
 """)
 
-vector_top_k = 20
+vector_top_k = 100
 res_top_k = 20
 
 
