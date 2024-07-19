@@ -21,9 +21,10 @@ with their interests and the item they are currently viewing given:
 
 Please only mention the product candidates listed in the context below. 
 Do not come up with or add any new products to the list.
-The below candidates are recommended based on the purchase patterns of other customers in the HRM database.
+The below candidates are recommended based on the shared purchase patterns of other customers in the HRM database.
 Select the best 4 to 5 product subset from the context that best match the time of year: {timeofYear} and to pair 
-with the current product being viewed.
+with the current product being viewed and recent searches. 
+For example, even if scarfs are listed here, they may not be appropriate for a summer time of year so best not to include those.
 Each product comes with an http `url` field. 
 Make sure to provide that http url with descriptive name text in markdown for each product. Do not alter the url.
 
@@ -42,8 +43,8 @@ RETURN product.`text` AS text,
     product {.*, `text`: Null, `textEmbedding`: Null, id: Null} AS metadata
 ORDER by score DESC LIMIT $resTopK"""
 
-vector_top_k = 30
-res_top_k = 20
+vector_top_k = 100
+res_top_k = 30
 
 
 def retriever(product_code):

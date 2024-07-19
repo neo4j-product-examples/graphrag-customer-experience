@@ -16,28 +16,40 @@ st.markdown('#### GraphRAG Email Generation:')
 customer_examples = [
     [
         'Alex Smith',
-        'Oversized Sweaters',
+        'denim jeans',
         'daae10780ecd14990ea190a1e9917da33fe96cd8cfa5e80b67b4600171aa77e0',
-        'Feb, 2024',
-    ],
-    [
-        'Robin Fischer',
-        'Oversized Sweaters',
-        '819f4eab1fd76b932fd403ae9f427de8eb9c5b64411d763bb26b5c8c3c30f16f',
-        'Feb, 2024'
-    ],
-    [
-        'Chris Johnson',
-        'Oversized Sweaters',
-        '44b0898ecce6cc1268dfdb0f91e053db014b973f67e34ed8ae28211410910693',
-        'Feb, 2024'
+        'July, 2024',
     ],
     [
         'Robin Fischer',
         'denim jeans',
         '819f4eab1fd76b932fd403ae9f427de8eb9c5b64411d763bb26b5c8c3c30f16f',
-        'Feb, 2024'
-    ]
+        'July, 2024',
+    ],
+    [
+        'Alex Smith',
+        'western boots',
+        'daae10780ecd14990ea190a1e9917da33fe96cd8cfa5e80b67b4600171aa77e0',
+        'July, 2024',
+    ],
+    [
+        'Chris Johnson',
+        'Oversized Sweaters',
+        '44b0898ecce6cc1268dfdb0f91e053db014b973f67e34ed8ae28211410910693',
+        'Feb, 2024',
+    ],
+    [
+        'Robin Fischer',
+        'denim jeans',
+        '819f4eab1fd76b932fd403ae9f427de8eb9c5b64411d763bb26b5c8c3c30f16f',
+        'Feb, 2024',
+    ],
+    [
+        'Alex Smith',
+        'oversized sweaters',
+        'daae10780ecd14990ea190a1e9917da33fe96cd8cfa5e80b67b4600171aa77e0',
+        'Feb, 2024',
+    ],
 ]
 
 
