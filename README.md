@@ -1,5 +1,4 @@
 # GraphRAG Customer Experience Example
-### __:warning: This Repo is Work in Progress :warning:__
 
 This project demonstrates how to implement GraphRAG for various touch points in the customer journey including:
 
@@ -15,7 +14,19 @@ To start the project, run the following command:
 docker-compose up
 ```
 
-Open `http://localhost:8501` in your browser to interact with the assistant.
+To start and rebuild (after changing env variables or code), run
+
+```
+docker-compose up --build
+```
+
+To stop the app, run
+
+```
+docker-compose down
+```
+
+Open `http://localhost:8501` in your browser to interact with the app.
 
 ## Environment Setup
 
@@ -58,6 +69,63 @@ Below is the graph data model we will use for the main graph:
 
 For the support graph you can use the database from this [customer-support-dummy-data.dump](customer-support-dummy-data.dump) dump file. It was created using the [LLM Graph Builder](https://neo4j.com/labs/genai-ecosystem/llm-graph-builder/) from some data scrapped off the web. 
 
+
+## Databricks / Spark Loading Scripts
+*\[TODO\]: Update to most recent schema and source files to work with demo.*
+
+See [here](https://github.com/neo4j-product-examples/ds-spark-examples/tree/main/spark-databricks-delta-lake) for scripts to stage & load H&M data from Databricks.
+
+
+## Deploying in the Cloud
+
+These directions are written for GCP VMs but should be repeatable with minor changes on other cloud providers.
+
+### 1 Create Instance
+* Create a Google Cloud VM instance.
+* Then create firewall rules to allow traffic on ports 8080 and 8501
+* Next resize the disk with the below command (often defaults or for 10GB disk which will cause problems).
+`gcloud compute disks resize <boot disk name> --size 100`
+Then restart the instance for the boot disk change to take effect
+
+### 2 Setup & Config
+Easiest with root access for demo purposes, so first:
+
+    sudo su
+
+Then you'll need to install git and clone this repo:
+
+    apt install -y git
+    mkdir -p /app
+    cd /app
+    git clone https://github.com/neo4j-product-examples/graphrag-customer-experience.git
+    cd graphrag-customer-experience
+
+Let's install python & pip:
+
+    apt install -y python
+    apt install -y pip
+
+Now, install docker [per these directions](https://docs.docker.com/engine/install/debian/#install-using-the-repository)
+
+Then install docker-compose
+    
+    apt install docker-compose
+
+Now update the configs in a `.env` file as documented above
+
+
+### 3 Run
+build and run the container with below command (the first time can take a while to build)
+
+    docker-compose up
+
+Optionally, you can run in a detached state to ensure the app continues even if you disconnect from the vm instance:
+
+    docker-compose up -d
+
+To stop the app run
+
+    docker-compose down
 ## Contributions
 
 Contributions are welcome!
