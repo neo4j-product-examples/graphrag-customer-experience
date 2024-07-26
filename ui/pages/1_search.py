@@ -1,3 +1,4 @@
+import os
 from urllib.parse import quote_plus
 
 import streamlit as st
@@ -10,6 +11,8 @@ st.markdown(":gray[Similar to Discovery, "
             "GraphRAG integrates customer purchasing patterns with "
             "unstructured product descriptions for "
             "personalized semantic search.]")
+
+ADVERTISED_ADDRESS = os.getenv('ADVERTISED_ADDRESS')
 
 customer_examples = [
     [
@@ -84,7 +87,7 @@ with col2:
             # draw the card
             with cols[k % n_cards_per_row]:
                 with st.container(height=400):
-                    product_page_url = 'http://localhost:8501/recommendations?' + \
+                    product_page_url = f'{ADVERTISED_ADDRESS}:8501/recommendations?' + \
                                        '&'.join([f'product_code={row["productCode"]}',
                                                  f'customer_name={quote_plus(customer_name_input)}',
                                                  f'interests={quote_plus(customer_interests_input)}',

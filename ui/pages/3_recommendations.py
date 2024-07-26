@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime
 from typing import Dict
 
@@ -14,6 +15,7 @@ st.markdown(":gray[GraphRAG integrates graph embeddings of customer purchase beh
             "to generate targeted recommendations.]")
 st.markdown('___')
 
+ADVERTISED_ADDRESS = os.getenv('ADVERTISED_ADDRESS')
 
 def get_product(product_code):
     response = requests.get(f'http://api:8080/product/?product_code={product_code}')
@@ -120,15 +122,15 @@ if product_code:
             generate_recommendations(product_code, customer_name, customer_interests, time_of_year)
         status.update(label="Finished!", state="complete", expanded=False)
         st.markdown('---\nYou can generate recommendations for any other product and search context '
-                    'from the [search page](http://localhost:8501/search). '
+                    f'from the [search page]({ADVERTISED_ADDRESS}:8501/search). '
                     'Just click on the titles of any product in the search results.')
 else:
     st.markdown('#### Product Recommendations')
     st.markdown('This page requires query parameters to generate recommendations. Below are some examples. '
                 'Use these links to experiment. \n'
-                '* http://localhost:8501/recommendations?product_code=842001&customer_name=Alex+Smith&interests'
+                f'* {ADVERTISED_ADDRESS}:8501/recommendations?product_code=842001&customer_name=Alex+Smith&interests'
                 '=Oversized+Sweaters&time_of_year=Feb%2C+2024 \n'
-                '* http://localhost:8501/recommendations?product_code=598423&customer_name=Robin+Fischer&interests'
+                f'* {ADVERTISED_ADDRESS}:8501/recommendations?product_code=598423&customer_name=Robin+Fischer&interests'
                 '=denim+jeans&time_of_year=July%2C+2024')
     st.markdown('You can also generate this page for any product and search context from the [search page]('
-                'http://localhost:8501/search). Just click on the titles of any product in the search results.')
+                f'{ADVERTISED_ADDRESS}:8501/search). Just click on the titles of any product in the search results.')

@@ -33,7 +33,7 @@ Open `http://localhost:8501` in your browser to interact with the app.
 You need to define the following environment variables in the `.env` file.
 
 ```
-# Main Product Graph
+#Main Product Graph
 NEO4J_URI=<YOUR_NEO4J_URI>
 NEO4J_USERNAME=<YOUR_NEO4J_USERNAME>
 NEO4J_PASSWORD=<YOUR_NEO4J_PASSWORD>
@@ -47,9 +47,10 @@ SUPPORT_NEO4J_DATABASE=neo4j
 
 #OpenAI
 OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
-NEO4J_URI=<YOUR_NEO4J_URI>
-NEO4J_USERNAME=<YOUR_NEO4J_USERNAME>
-NEO4J_PASSWORD=<YOUR_NEO4J_PASSWORD>
+
+# Other
+# change to public IP address when deploying
+ADVERTISED_ADDRESS="http://localhost"
 ```
 
 ## Docker containers

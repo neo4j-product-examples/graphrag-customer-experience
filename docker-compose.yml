@@ -23,6 +23,8 @@ services:
   ui:
     build:
       context: ./ui
+    environment:
+      - ADVERTISED_ADDRESS=${ADVERTISED_ADDRESS}
     networks:
       - net
     x-develop:
