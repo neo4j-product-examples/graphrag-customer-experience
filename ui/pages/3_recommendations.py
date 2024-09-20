@@ -113,10 +113,10 @@ if product_code:
         col1, col2 = st.columns(2)
         if compare_graph_rag:
             with col1:
-                st.subheader("Vector Only")
+                st.subheader("Baseline RAG (Text Vectors)")
                 generate_recommendations(product_code, customer_name, customer_interests, time_of_year, True)
             with col2:
-                st.subheader("GraphRAG")
+                st.subheader("GraphRAG (Graph Vectors)")
                 generate_recommendations(product_code, customer_name, customer_interests, time_of_year)
         else:
             generate_recommendations(product_code, customer_name, customer_interests, time_of_year)
