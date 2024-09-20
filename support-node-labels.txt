@@ -1,0 +1,17 @@
+Concept
+Group
+Item
+Material
+Membership
+Organization
+Person
+Place
+Policy
+Process
+Service
+ShippingOption
+
+
+
+
+
