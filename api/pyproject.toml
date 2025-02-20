@@ -11,6 +11,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.11"
 uvicorn = "^0.23.2"
+httpx = "^0.25"
 langserve = {extras = ["server"], version = ">=0.0.30"}
 pydantic = "<2"
 neo4j-chains = {path = "packages/neo4j-chains", develop = true}
