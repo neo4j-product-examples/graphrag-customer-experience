@@ -68,7 +68,7 @@ Constructing the complete knowledge graph requires [creating your own AuraDS ins
 There are two components to the graph that need to be loaded:  the __Product Graph__ & __Support Graph__:
 
 ### Product Graph Loading
-For the product graph powering Discovery, Search, and Recommendations pages use [this notebook](https://github.com/neo4j-product-examples/graphrag-examples/blob/main/load-data/hm-data.ipynb) to load data. This leverages the [H&M Personalized Fashion Recommendations Dataset](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data), a sample of real customer purchase data that includes rich information around products including names, types, descriptions, department sections, etc.
+For the product graph powering Discovery, Search, and Recommendations pages use [this notebook](https://github.com/neo4j-product-examples/graphrag-examples/blob/main/patterns-app/load-data/hm-data.ipynb) to load data. This leverages the [H&M Personalized Fashion Recommendations Dataset](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data), a sample of real customer purchase data that includes rich information around products including names, types, descriptions, department sections, etc.
 
 Below is the end result graph data model:
 <img src="images/hm-data-model.png" alt="summary" width="1000"/>
